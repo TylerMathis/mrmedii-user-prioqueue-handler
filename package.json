@@ -1,6 +1,6 @@
 {
   "name": "mrmedii-user-prioqueue-handler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple user priority queue for Twitch.tv",
   "main": "index.js",
   "scripts": {

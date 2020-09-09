@@ -42,8 +42,9 @@ function enqueueUser(context)
     var name = context.username;
     var priority = 1;
 
-    if (context['badge-info'].hasOwnProperty('subscriber'))
-        priority += +context['badge-info'].subscriber;
+    if (context.hasOwnProperty('badge-info'))
+        if (context['badge-info'].hasOwnProperty('subscriber'))
+            priority += +context['badge-info'].subscriber;
 
     priorityQueue.enqueue(name, priority);
 }
