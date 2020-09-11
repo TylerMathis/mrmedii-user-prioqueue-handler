@@ -16,6 +16,8 @@ function onMessageHandler(target, context, msg, self)
     // ignore messages from other bots
     if (self) return;
 
+    console.log(context);
+
     const cleanMsg = msg.trim().toLowerCase().split();
     const commName = cleanMsg[0];
     const param1 = cleanMsg[1];
@@ -23,7 +25,7 @@ function onMessageHandler(target, context, msg, self)
     switch (commName)
     {
         case '!joinqueue':
-            enqueueUser(context);
+            enqueueUser(target, context);
             break;
         case '!leavequeue':
             removeUser(context);
@@ -37,15 +39,20 @@ function onMessageHandler(target, context, msg, self)
     }
 }
 
-function enqueueUser(context)
+function enqueueUser(target, context)
 {
     var name = context.username;
     var priority = 1;
 
-    if (context.hasOwnProperty('badge-info'))
+    if (context['badge-info'] != null)
+    {
+        if (context['badge-info'].hasOwnProperty('vip'))
+            priority += 100;
         if (context['badge-info'].hasOwnProperty('subscriber'))
             priority += +context['badge-info'].subscriber;
+    }
 
+    client.say(target, context.username + " has been added to the queue!");
     priorityQueue.enqueue(name, priority);
 }
 
