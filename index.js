@@ -16,8 +16,6 @@ function onMessageHandler(target, context, msg, self)
     // ignore messages from other bots
     if (self) return;
 
-    console.log(context);
-
     const cleanMsg = msg.trim().toLowerCase().split();
     const commName = cleanMsg[0];
     const param1 = cleanMsg[1];
@@ -31,7 +29,7 @@ function onMessageHandler(target, context, msg, self)
             removeUser(context);
             break;
         case '!currentqueue':
-            console.log(priorityQueue.printQueue(param1));
+            client.say(target, priorityQueue.printQueue(param1));
             break;
         case '!clearqueue':
             priorityQueue.clearQueue();
@@ -52,8 +50,8 @@ function enqueueUser(target, context)
             priority += +context['badge-info'].subscriber;
     }
 
-    client.say(target, context.username + " has been added to the queue!");
     priorityQueue.enqueue(name, priority);
+    client.say(target, context.username + " has been added to the queue!");
 }
 
 function removeUser(context)
