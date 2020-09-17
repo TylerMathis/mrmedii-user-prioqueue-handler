@@ -3,9 +3,13 @@
 var client = undefined;
 var priorityQueue = undefined;
 
+let minPrio = 10000000;
+
 exports.init = function(c)
 {
     priorityQueue = new PriorityQueue();
+
+    log("initialized");
 
     client = c;
 	client.on('message', onMessageHandler);
@@ -40,14 +44,19 @@ function onMessageHandler(target, context, msg, self)
 function enqueueUser(target, context)
 {
     var name = context.username;
-    var priority = 1;
+    var priority = minPrio;
 
-    if (context['badge-info'] != null)
+    if (context['badges'] != null)
     {
-        if (context['badge-info'].hasOwnProperty('vip'))
-            priority += 100;
-        if (context['badge-info'].hasOwnProperty('subscriber'))
-            priority += +context['badge-info'].subscriber;
+        let badges = context['badges'];
+        if (badges.hasOwnProperty('vip'))
+            priority -= minPrio / 2;
+        if (badges.hasOwnProperty('bits'))
+            priority -= badges.bits;
+        if (badges.hasOwnProperty('subscriber'))
+            priority -= +context['badges'].subscriber;
+        if (priority < 0)
+            priority = 0;
     }
 
     priorityQueue.enqueue(name, priority);
@@ -63,6 +72,9 @@ function removeUser(context)
         priority += +context['badge-info'].subscriber;
 
     priorityQueue.remove(name, priority);
+
+
+    client.say(target, context.username + " has been removed from the queue!");
 }
 
 class QElement
@@ -98,7 +110,7 @@ class PriorityQueue
 
         for (var i = 0; i < this.items.length; i++)
         {
-            if (this.items[i].priority < qElement.priority)
+            if (this.items[i].priority > qElement.priority)
             {
                 this.items.splice(i, 0, qElement);
                 contain = true;
@@ -108,12 +120,15 @@ class PriorityQueue
 
         if (!contain)
             this.items.push(qElement);
+
+        log(element + " has been added to the queue with prio " + priority + "!");
     }
 
     dequeue()
     {
         if (this.isEmpty())
             return "Underflow";
+
         return this.items.shift();
     }
 
@@ -133,6 +148,8 @@ class PriorityQueue
             }
 
         }
+
+        log(element + " has been removed from the queue!");
     }
 
     front()
@@ -145,9 +162,12 @@ class PriorityQueue
     elementExists(element)
     {
         for (var i = 0; i < this.items.length; i++)
+        {
+            log("comparing " + this.items[i].element + " to " + element);
             if (this.items[i].element === element)
                 return true;
-       return false;
+        }
+        return false;
     }
 
     isEmpty()
@@ -170,4 +190,19 @@ class PriorityQueue
     {
         this.items = [];
     }
+}
+
+function log(msg) {
+	const pref = 'uph ~ ';
+	console.log(pref + msg);
+}
+
+function logError(msg) {
+	const pref = 'uph ~ ERROR: ';
+	console.log(pref + msg);
+}
+
+function logFatal(msg) {
+	const pref = 'uph ~ FATAL: ';
+	console.log(pref + msg);
 }
